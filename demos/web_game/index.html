@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wii U Pro Controller — Flight Feeling & Diagnostic Arena</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: #0b0e14;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #141a24;
+      border-bottom: 1px solid #1f293d;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .title-group h1 { font-size: 1.15rem; font-weight: 700; color: #38bdf8; }
+    .title-group p { font-size: 0.8rem; color: #94a3b8; }
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-status.active { background: #064e3b; color: #34d399; border-color: #059669; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+    }
+
+    #gameCanvas {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+      display: block;
+    }
+
+    /* Side HUD */
+    #hud {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      pointer-events: none;
+    }
+    .hud-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .sticks-container {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+    }
+    .stick-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .stick-label { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+    .radar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      position: relative;
+      overflow: hidden;
+    }
+    .radar::before, .radar::after {
+      content: '';
+      position: absolute;
+      background: rgba(148, 163, 184, 0.2);
+    }
+    .radar::before { top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-50%); }
+    .radar::after { left: 0; right: 0; top: 50%; height: 1px; transform: translateY(-50%); }
+    .radar-pip {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.04s ease-out;
+    }
+    .stick-coords { font-size: 0.7rem; font-family: monospace; color: #cbd5e1; }
+
+    /* Button Grid */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .btn-key {
+      padding: 6px 0;
+      text-align: center;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      transition: all 0.08s ease;
+    }
+    .btn-key.pressed {
+      background: #38bdf8;
+      color: #041226;
+      border-color: #7dd3fc;
+      box-shadow: 0 0 10px #38bdf8;
+      transform: scale(0.96);
+    }
+
+    /* Instructions overlay */
+    #guide {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      border: 1px solid #334155;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+      pointer-events: none;
+    }
+    .key-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #334155;
+      color: #f1f5f9;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1>Wii U Pro Controller — Flight Feeling & Diagnostic Arena</h1>
+      <p>Real-time analog curves, deadzone circularity, latency & 60 FPS physics</p>
+    </div>
+    <div id="statusBadge" class="badge-status">
+      <span class="dot"></span>
+      <span id="statusText">Waiting for Controller Stream...</span>
+    </div>
+  </header>
+
+  <main>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud">
+      <div class="hud-title">
+        <span>Analog Stick Radars</span>
+        <span id="rateLabel">0 Hz</span>
+      </div>
+      <div class="sticks-container">
+        <div class="stick-box">
+          <div class="stick-label">L-STICK (THRUST / VECTOR)</div>
+          <div class="radar" id="radarL">
+            <div class="radar-pip" id="pipL"></div>
+          </div>
+          <div class="stick-coords" id="coordsL">X:+0.00 Y:+0.00</div>
+        </div>
+        <div class="stick-box">
+          <div class="stick-label">R-STICK (TURRET / AIM)</div>
+          <div class="radar" id="radarR">
+            <div class="radar-pip" id="pipR"></div>
+          </div>
+          <div class="stick-coords" id="coordsR">X:+0.00 Y:+0.00</div>
+        </div>
+      </div>
+
+      <div class="hud-title">Digital Inputs</div>
+      <div class="btn-grid">
+        <div class="btn-key" id="k-A">A</div>
+        <div class="btn-key" id="k-B">B</div>
+        <div class="btn-key" id="k-X">X</div>
+        <div class="btn-key" id="k-Y">Y</div>
+        <div class="btn-key" id="k-ZL">ZL</div>
+        <div class="btn-key" id="k-ZR">ZR</div>
+        <div class="btn-key" id="k-L">L</div>
+        <div class="btn-key" id="k-R">R</div>
+        <div class="btn-key" id="k-UP">UP</div>
+        <div class="btn-key" id="k-DOWN">DOWN</div>
+        <div class="btn-key" id="k-LEFT">LEFT</div>
+        <div class="btn-key" id="k-RIGHT">RIGHT</div>
+        <div class="btn-key" id="k-MINUS">-</div>
+        <div class="btn-key" id="k-PLUS">+</div>
+        <div class="btn-key" id="k-L3">L3</div>
+        <div class="btn-key" id="k-R3">R3</div>
+      </div>
+    </div>
+
+    <div id="guide">
+      🎮 <b>Flight Controls:</b><br>
+      • <span class="key-badge">Left Stick</span> : Analog Ship Steering & Vectoring<br>
+      • <span class="key-badge">Right Stick</span> : Independent 360° Laser Aiming<br>
+      • <span class="key-badge">ZR</span> or <span class="key-badge">A</span> : Main Plasma Cannons<br>
+      • <span class="key-badge">ZL</span> or <span class="key-badge">B</span> : Hyper-Boost Thruster<br>
+      • <span class="key-badge">X</span> : Shockwave EMP (clears nearby debris)<br>
+      • <span class="key-badge">Y</span> : Inertial Drift Mode (Newtonian glide)
+    </div>
+  </main>
+
+  <script>
+    /* ========================================================
+       1. CONTROLLER STATE & TELEMETRY ENGINE
+       ======================================================== */
+    const state = {
+      lx: 0, ly: 0,
+      rx: 0, ry: 0,
+      btns: new Set(),
+      bat: 0,
+      lastUpdate: performance.now(),
+      pktCount: 0,
+      hz: 0
+    };
+
+    const statusBadge = document.getElementById('statusBadge');
+    const statusText = document.getElementById('statusText');
+    const rateLabel = document.getElementById('rateLabel');
+    const pipL = document.getElementById('pipL');
+    const pipR = document.getElementById('pipR');
+    const coordsL = document.getElementById('coordsL');
+    const coordsR = document.getElementById('coordsR');
+
+    // Calculate Polling Hz
+    setInterval(() => {
+      state.hz = state.pktCount;
+      state.pktCount = 0;
+      if (state.hz > 0) {
+        rateLabel.textContent = `${state.hz} Hz`;
+        statusBadge.className = 'badge-status active';
+        statusText.textContent = `Controller Online (${state.hz} Hz)`;
+      } else {
+        rateLabel.textContent = `0 Hz`;
+        statusBadge.className = 'badge-status';
+        statusText.textContent = `Waiting for Controller Stream...`;
+      }
+    }, 1000);
+
+    function updateTelemetry() {
+      // Radars
+      // In standard joystick: Up is -1.0, Down is +1.0. 
+      // On canvas/screen: Y top is negative, bottom is positive.
+      // So translating pip directly: top 50% + (ly * 40px), left 50% + (lx * 40px)
+      pipL.style.transform = `translate(calc(-50% + ${state.lx * 42}px), calc(-50% + ${state.ly * 42}px))`;
+      pipR.style.transform = `translate(calc(-50% + ${state.rx * 42}px), calc(-50% + ${state.ry * 42}px))`;
+
+      coordsL.textContent = `X:${state.lx >= 0 ? '+' : ''}${state.lx.toFixed(2)} Y:${state.ly >= 0 ? '+' : ''}${state.ly.toFixed(2)}`;
+      coordsR.textContent = `X:${state.rx >= 0 ? '+' : ''}${state.rx.toFixed(2)} Y:${state.ry >= 0 ? '+' : ''}${state.ry.toFixed(2)}`;
+
+      // Buttons
+      const allBtns = ['A','B','X','Y','ZL','ZR','L','R','UP','DOWN','LEFT','RIGHT','MINUS','PLUS','L3','R3'];
+      allBtns.forEach(name => {
+        const el = document.getElementById(`k-${name}`);
+        if (!el) return;
+        const key = name === 'MINUS' ? '-' : (name === 'PLUS' ? '+' : name);
+        if (state.btns.has(key)) {
+          el.classList.add('pressed');
+        } else {
+          el.classList.remove('pressed');
+        }
+      });
+    }
+
+    // Connect to Server-Sent Events (SSE) stream from direct_connect.py
+    function initEventStream() {
+      const evtSource = new EventSource('/events');
+      evtSource.onmessage = function(e) {
+        try {
+          const data = JSON.parse(e.data);
+          state.lx = data.lx;
+          state.ly = data.ly;
+          state.rx = data.rx;
+          state.ry = data.ry;
+          state.btns = new Set(data.btns);
+          state.bat = data.bat;
+          state.pktCount++;
+          updateTelemetry();
+        } catch (err) {}
+      };
+      evtSource.onerror = function() {
+        // Fallback to HTML5 Gamepad API if SSE fails (e.g. running via file://)
+        pollHTML5Gamepad();
+      };
+    }
+
+    // HTML5 Gamepad API Fallback
+    function pollHTML5Gamepad() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let found = false;
+      for (const gp of gamepads) {
+        if (gp) {
+          found = true;
+          state.lx = gp.axes[0] || 0;
+          state.ly = gp.axes[1] || 0;
+          state.rx = gp.axes[2] || 0;
+          state.ry = gp.axes[3] || 0;
+
+          const btns = new Set();
+          if (gp.buttons[0] && gp.buttons[0].pressed) btns.add('B');
+          if (gp.buttons[1] && gp.buttons[1].pressed) btns.add('A');
+          if (gp.buttons[2] && gp.buttons[2].pressed) btns.add('Y');
+          if (gp.buttons[3] && gp.buttons[3].pressed) btns.add('X');
+          if (gp.buttons[4] && gp.buttons[4].pressed) btns.add('L');
+          if (gp.buttons[5] && gp.buttons[5].pressed) btns.add('R');
+          if (gp.buttons[6] && gp.buttons[6].pressed) btns.add('ZL');
+          if (gp.buttons[7] && gp.buttons[7].pressed) btns.add('ZR');
+          if (gp.buttons[8] && gp.buttons[8].pressed) btns.add('-');
+          if (gp.buttons[9] && gp.buttons[9].pressed) btns.add('+');
+          if (gp.buttons[10] && gp.buttons[10].pressed) btns.add('L3');
+          if (gp.buttons[11] && gp.buttons[11].pressed) btns.add('R3');
+          if (gp.buttons[12] && gp.buttons[12].pressed) btns.add('UP');
+          if (gp.buttons[13] && gp.buttons[13].pressed) btns.add('DOWN');
+          if (gp.buttons[14] && gp.buttons[14].pressed) btns.add('LEFT');
+          if (gp.buttons[15] && gp.buttons[15].pressed) btns.add('RIGHT');
+          state.btns = btns;
+          state.pktCount++;
+          updateTelemetry();
+          break;
+        }
+      }
+      requestAnimationFrame(pollHTML5Gamepad);
+    }
+
+    /* ========================================================
+       2. WEB AUDIO SOUND SYNTHESIZER
+       ======================================================== */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+    function ensureAudio() {
+      if (!actx) actx = new AudioCtx();
+      if (actx.state === 'suspended') actx.resume();
+    }
+
+    function playLaser() {
+      try {
+        ensureAudio();
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, actx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, actx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start();
+        osc.stop(actx.currentTime + 0.12);
+      } catch(e) {}
+    }
+
+    function playExplode() {
+      try {
+        ensureAudio();
+        const bufferSize = actx.sampleRate * 0.25;
+        const buffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = actx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = actx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(400, actx.currentTime);
+        filter.frequency.linearRampToValueAtTime(40, actx.currentTime + 0.25);
+        const gain = actx.createGain();
+        gain.gain.setValueAtTime(0.2, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.25);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(actx.destination);
+        noise.start();
+      } catch(e) {}
+    }
+
+    /* ========================================================
+       3. 60 FPS INTERACTIVE FLIGHT ARENA
+       ======================================================== */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const ship = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      vx: 0,
+      vy: 0,
+      angle: 0,
+      aimAngle: 0,
+      speed: 0,
+      radius: 18,
+      lastShoot: 0
+    };
+
+    const bullets = [];
+    const particles = [];
+    const asteroids = [];
+
+    // Spawn Asteroids
+    for (let i = 0; i < 18; i++) {
+      asteroids.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+        radius: 20 + Math.random() * 25,
+        angle: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.02
+      });
+    }
+
+    let lastTime = performance.now();
+
+    function loop(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      // --- SHIP MOVEMENT (LEFT STICK) ---
+      const lx = state.lx;
+      const ly = state.ly; // ly is negative for Up, positive for Down
+      const stickMag = Math.sqrt(lx * lx + ly * ly);
+
+      if (stickMag > 0.12) {
+        // Steer towards stick vector
+        const targetAngle = Math.atan2(ly, lx);
+        let diff = targetAngle - ship.angle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        ship.angle += diff * 10 * dt;
+
+        // Accelerate along stick vector
+        const thrust = stickMag * 450 * dt;
+        ship.vx += Math.cos(targetAngle) * thrust;
+        ship.vy += Math.sin(targetAngle) * thrust;
+
+        // Thruster particles
+        for (let i = 0; i < 2; i++) {
+          particles.push({
+            x: ship.x - Math.cos(ship.angle) * 16 + (Math.random() - 0.5) * 6,
+            y: ship.y - Math.sin(ship.angle) * 16 + (Math.random() - 0.5) * 6,
+            vx: -Math.cos(ship.angle) * (150 + Math.random() * 80) + ship.vx * 0.5,
+            vy: -Math.sin(ship.angle) * (150 + Math.random() * 80) + ship.vy * 0.5,
+            life: 0.35,
+            color: '#38bdf8'
+          });
+        }
+      }
+
+      // Boost with ZL or B
+      if (state.btns.has('ZL') || state.btns.has('B')) {
+        ship.vx += Math.cos(ship.angle) * 800 * dt;
+        ship.vy += Math.sin(ship.angle) * 800 * dt;
+        for (let i = 0; i < 4; i++) {
+          particles.push({
+            x: ship.x - Math.cos(ship.angle) * 16,
+            y: ship.y - Math.sin(ship.angle) * 16,
+            vx: -Math.cos(ship.angle) * 350 + (Math.random() - 0.5) * 100,
+            vy: -Math.sin(ship.angle) * 350 + (Math.random() - 0.5) * 100,
+            life: 0.45,
+            color: '#f59e0b'
+          });
+        }
+      }
+
+      // --- AIMING & SHOOTING (RIGHT STICK & ZR/A) ---
+      const rx = state.rx;
+      const ry = state.ry;
+      const rMag = Math.sqrt(rx * rx + ry * ry);
+
+      if (rMag > 0.15) {
+        ship.aimAngle = Math.atan2(ry, rx);
+      } else {
+        ship.aimAngle = ship.angle;
+      }
+
+      // Shoot on ZR, A, or Right Stick pushed > 0.7
+      const isShooting = state.btns.has('ZR') || state.btns.has('A') || (rMag > 0.75);
+      if (isShooting && (now - ship.lastShoot > 110)) {
+        ship.lastShoot = now;
+        playLaser();
+        const spread = (Math.random() - 0.5) * 0.05;
+        const bAngle = ship.aimAngle + spread;
+        bullets.push({
+          x: ship.x + Math.cos(bAngle) * 20,
+          y: ship.y + Math.sin(bAngle) * 20,
+          vx: Math.cos(bAngle) * 850 + ship.vx,
+          vy: Math.sin(bAngle) * 850 + ship.vy,
+          life: 1.2
+        });
+      }
+
+      // Shockwave EMP on X
+      if (state.btns.has('X')) {
+        playExplode();
+        for (const ast of asteroids) {
+          const dx = ast.x - ship.x;
+          const dy = ast.y - ship.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 280) {
+            ast.vx += (dx / dist) * 350;
+            ast.vy += (dy / dist) * 350;
+          }
+        }
+        for (let a = 0; a < Math.PI * 2; a += 0.2) {
+          particles.push({
+            x: ship.x, y: ship.y,
+            vx: Math.cos(a) * 320, vy: Math.sin(a) * 320,
+            life: 0.5, color: '#ec4899'
+          });
+        }
+      }
+
+      // Drag (unless drifting on Y)
+      if (!state.btns.has('Y')) {
+        ship.vx *= Math.pow(0.85, dt * 10);
+        ship.vy *= Math.pow(0.85, dt * 10);
+      }
+
+      ship.x += ship.vx * dt;
+      ship.y += ship.vy * dt;
+
+      // Wrap screen
+      if (ship.x < 0) ship.x += canvas.width;
+      if (ship.x > canvas.width) ship.x -= canvas.width;
+      if (ship.y < 0) ship.y += canvas.height;
+      if (ship.y > canvas.height) ship.y -= canvas.height;
+
+      // --- BULLETS ---
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.life -= dt;
+
+        // Collision with asteroids
+        let hit = false;
+        for (let j = asteroids.length - 1; j >= 0; j--) {
+          const ast = asteroids[j];
+          const dist = Math.hypot(b.x - ast.x, b.y - ast.y);
+          if (dist < ast.radius) {
+            hit = true;
+            playExplode();
+            // Particle burst
+            for (let p = 0; p < 8; p++) {
+              particles.push({
+                x: ast.x, y: ast.y,
+                vx: (Math.random() - 0.5) * 200,
+                vy: (Math.random() - 0.5) * 200,
+                life: 0.4,
+                color: '#f97316'
+              });
+            }
+            if (ast.radius > 24) {
+              ast.radius /= 1.5;
+              asteroids.push({
+                x: ast.x, y: ast.y,
+                vx: -ast.vx + (Math.random() - 0.5) * 50,
+                vy: -ast.vy + (Math.random() - 0.5) * 50,
+                radius: ast.radius,
+                angle: Math.random() * Math.PI,
+                vRot: 0.03
+              });
+            } else {
+              asteroids.splice(j, 1);
+              // Respawn elsewhere
+              asteroids.push({
+                x: Math.random() < 0.5 ? 0 : canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                radius: 25 + Math.random() * 20,
+                angle: 0, vRot: 0.02
+              });
+            }
+            break;
+          }
+        }
+
+        if (hit || b.life <= 0) bullets.splice(i, 1);
+      }
+
+      // --- ASTEROIDS ---
+      for (const ast of asteroids) {
+        ast.x += ast.vx;
+        ast.y += ast.vy;
+        ast.angle += ast.vRot;
+        if (ast.x < -50) ast.x = canvas.width + 50;
+        if (ast.x > canvas.width + 50) ast.x = -50;
+        if (ast.y < -50) ast.y = canvas.height + 50;
+        if (ast.y > canvas.height + 50) ast.y = -50;
+      }
+
+      // --- PARTICLES ---
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      // ========================================================
+      // 4. RENDER
+      // ========================================================
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Starfield background
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      for (let i = 0; i < 40; i++) {
+        const sx = ((i * 12345) % canvas.width);
+        const sy = ((i * 54321) % canvas.height);
+        ctx.fillRect(sx, sy, 1.5, 1.5);
+      }
+
+      // Asteroids
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      for (const ast of asteroids) {
+        ctx.save();
+        ctx.translate(ast.x, ast.y);
+        ctx.rotate(ast.angle);
+        ctx.beginPath();
+        const sides = 7;
+        for (let s = 0; s < sides; s++) {
+          const a = (s / sides) * Math.PI * 2;
+          const r = ast.radius * (0.8 + ((s % 2) * 0.4));
+          const px = Math.cos(a) * r;
+          const py = Math.sin(a) * r;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Particles
+      for (const p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(1, p.life * 4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Bullets
+      ctx.fillStyle = '#38bdf8';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+      for (const b of bullets) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Draw Ship
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(ship.angle);
+
+      // Ship body
+      ctx.beginPath();
+      ctx.moveTo(22, 0);
+      ctx.lineTo(-14, -13);
+      ctx.lineTo(-8, 0);
+      ctx.lineTo(-14, 13);
+      ctx.closePath();
+      ctx.fillStyle = '#0284c7';
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Cockpit
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fill();
+
+      // Aiming laser guide
+      ctx.restore();
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(ship.aimAngle);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(24, 0);
+      ctx.lineTo(120, 0);
+      ctx.stroke();
+      ctx.restore();
+
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('click', () => ensureAudio());
+    initEventStream();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

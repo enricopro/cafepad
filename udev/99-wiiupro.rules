@@ -1,0 +1,17 @@
+# ====================================================================
+# Udev rules for Wii U Pro Controller (Bluetooth & USB)
+# Grants unprivileged user desktop sessions access to create virtual
+# gamepads (/dev/uinput) and read USB/HID nodes without sudo.
+# ====================================================================
+
+# 1. Virtual Gamepad (uinput) access for local user sessions
+KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
+
+# 2. Wii U Pro Controller over USB (Clone VID 0471, PID 0666)
+KERNEL=="hidraw*", ATTRS{idVendor}=="0471", ATTRS{idProduct}=="0666", MODE="0666", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0471", ATTRS{idProduct}=="0666", MODE="0666", TAG+="uaccess"
+
+# 3. Official Nintendo Wii U Pro Controller / Adapter (VID 057e, PID 0330)
+KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0330", MODE="0666", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0330", MODE="0666", TAG+="uaccess"
+KERNEL=="hidraw*", KERNELS=="*057E:0330*", MODE="0666", TAG+="uaccess"

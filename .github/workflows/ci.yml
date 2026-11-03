@@ -1,0 +1,33 @@
+name: CI Build & Test
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make libbluetooth-dev python3 python3-tk
+
+      - name: Build C Library & Tests
+        run: |
+          make all
+
+      - name: Verify Python modules syntax
+        run: |
+          python3 -m py_compile cafepad.py
+          python3 -m py_compile cafepad_gui.py
+
+      - name: Install Python Package
+        run: |
+          pip install .

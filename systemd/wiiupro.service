@@ -1,0 +1,15 @@
+[Unit]
+Description=Wii U Pro Controller Bluetooth Bridge
+Documentation=https://github.com/
+After=bluetooth.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/wiiupro --no-web --daemon
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

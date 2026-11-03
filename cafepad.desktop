@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=CaféPad
+Comment=Nintendo Wii U Pro Controller Manager & Gamepad Bridge
+Exec=cafepad-gui
+Icon=cafepad
+Terminal=false
+Type=Application
+Categories=Game;Settings;HardwareSettings;
+Keywords=wiiu;controller;gamepad;nintendo;bluetooth;
+StartupNotify=true

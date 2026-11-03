@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: wiiupro
+Description: Universal C library for Nintendo Wii U Pro Controller (Bluetooth L2CAP, USB, and HID)
+Version: 1.0.0
+Libs: -L${libdir} -lwiiupro -lbluetooth -lm
+Cflags: -I${includedir}

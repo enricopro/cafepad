@@ -1,0 +1,11 @@
+.vscode/
+sd_kernels/out
+sd_kernels/sd_kernels.zip
+
+**/build/
+
+bluubomb
+*.bin
+*.bin.h
+*.elf
+*_syms.h

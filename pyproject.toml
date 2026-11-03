@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cafepad"
+version = "1.0.0"
+description = "Universal Linux Driver, C99 Library & GUI for Nintendo Wii U Pro Controllers (Project Café)"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+authors = [
+    { name = "CaféPad Open Source Contributors" }
+]
+keywords = ["wiiu", "gamepad", "bluetooth", "l2cap", "controller", "driver", "linux", "uinput", "project-cafe"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Games/Entertainment",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.scripts]
+cafepad = "cafepad:main"
+cafepad-gui = "cafepad_gui:main"
+wiiupro = "cafepad:main"

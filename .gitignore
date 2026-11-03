@@ -1,0 +1,28 @@
+# Binaries and object files
+*.o
+*.so
+*.a
+test_controller
+minimal_example
+cafepad.pc
+wiiupro.pc
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Local configs and caches
+.cache/
+cafepad.json
+wiiupro.json
+
+# Logs and temporary files
+*.log
+capture.jsonl
+.DS_Store
+*.swp
+*~
