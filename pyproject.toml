@@ -8,9 +8,9 @@ version = "1.0.0"
 description = "Universal Linux Driver, C99 Library & GUI for Nintendo Wii U Pro Controllers (Project Café)"
 readme = "README.md"
 requires-python = ">=3.7"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-or-later" }
 authors = [
-    { name = "CaféPad Open Source Contributors" }
+    { name = "CaféPad Contributors" }
 ]
 keywords = ["wiiu", "gamepad", "bluetooth", "l2cap", "controller", "driver", "linux", "uinput", "project-cafe"]
 classifiers = [
@@ -19,7 +19,7 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Topic :: Games/Entertainment",
     "Topic :: System :: Hardware :: Hardware Drivers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: C",
     "Operating System :: POSIX :: Linux",
