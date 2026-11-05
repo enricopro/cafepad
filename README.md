@@ -57,7 +57,7 @@ CaféPad acts as a dedicated userspace bridge between the proprietary Nintendo W
 ### System Architecture & Data Flow
 
 <p align="center">
-  <img src="assets/architecture.svg" width="100%" alt="CaféPad System Architecture & Data Flow" />
+  <img src="assets/architecture.png" width="100%" alt="CaféPad System Architecture & Data Flow" />
 </p>
 
 ---
