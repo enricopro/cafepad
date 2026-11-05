@@ -56,26 +56,9 @@ CaféPad acts as a dedicated userspace bridge between the proprietary Nintendo W
 
 ### System Architecture & Data Flow
 
-```mermaid
-flowchart TD
-    classDef mainNode fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#ffffff;
-    classDef sideNode fill:#161b22,stroke:#a371f7,stroke-width:2px,color:#ffffff;
-    classDef gameNode fill:#161b22,stroke:#3fb950,stroke-width:2px,color:#ffffff;
-
-    PAD["🎮 1. Physical Wii U Pro Controller<br/>Reads your buttons, sticks, and rumble triggers"]:::mainNode
-    BT["📶 2. PC Bluetooth Adapter<br/>Direct L2CAP wireless link (zero dongles needed)"]:::mainNode
-    CORE["⚙️ 3. CaféPad C99 Engine<br/>Decodes hardware signals & keeps gamepad awake"]:::mainNode
-    VIRT["🎯 4. Virtual Xbox 360 Gamepad<br/>Created inside the Linux kernel (/dev/uinput)"]:::mainNode
-    GAMES["👾 5. Steam & Games<br/>Native plug-and-play support with real in-game rumble"]:::gameNode
-    GUI["🖥️ CaféPad Desktop App<br/>Battery monitor, live calibration & visual sync"]:::sideNode
-
-    PAD <-->|Wireless Signal & Vibration| BT
-    BT <-->|Raw Bluetooth Packets| CORE
-    CORE -->|Translates to Standard Input| VIRT
-    VIRT -->|Standard Linux Gamepad Events| GAMES
-    GAMES -.->|In-Game Force Feedback| CORE
-    CORE <-->|Live Telemetry & Sync| GUI
-```
+<p align="center">
+  <img src="assets/architecture.svg" width="100%" alt="CaféPad System Architecture & Data Flow" />
+</p>
 
 ---
 

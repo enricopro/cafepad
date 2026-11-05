@@ -1,0 +1,212 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="canvasBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Card Shadow -->
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+
+    <!-- Connector Arrow Markers -->
+    <marker id="arrowDown" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 0 L 5 8 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowUp" viewBox="0 0 10 10" refX="5" refY="2" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 8 L 10 8 L 5 0 z" fill="#ec4899"/>
+    </marker>
+    <marker id="arrowRight" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 0 10 L 8 5 z" fill="#a855f7"/>
+    </marker>
+    <marker id="arrowLeft" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 8 0 L 8 10 L 0 5 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+
+  <style>
+    .card { rx: 12px; stroke-width: 1.5px; filter: url(#shadow); }
+    .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #f8fafc; }
+    .desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #94a3b8; }
+    .badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; font-weight: 700; }
+    .arrow-badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; font-weight: 600; }
+  </style>
+
+  <!-- Main Canvas -->
+  <rect width="880" height="620" rx="16" fill="url(#canvasBg)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- ================= STAGE 1: Physical Controller ================= -->
+  <g transform="translate(60, 30)">
+    <rect width="450" height="80" fill="url(#cardBg)" stroke="#38bdf8" stroke-opacity="0.8" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="14" width="52" height="52" rx="10" fill="#0369a1" fill-opacity="0.2" stroke="#0284c7" stroke-width="1.5"/>
+    <!-- Controller Vector Icon -->
+    <g transform="translate(20, 20)" stroke="#38bdf8" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 13 C6 8, 10 4, 20 4 L20 4 C30 4, 34 8, 34 13 C34 23, 36 33, 30 36 C27 38, 24 33, 23 29 C22 26, 18 26, 17 29 C16 33, 13 38, 10 36 C4 33, 6 23, 6 13 Z" fill="#0f172a"/>
+      <!-- Symmetrical Sticks at top -->
+      <circle cx="14" cy="13" r="3" fill="#38bdf8"/>
+      <circle cx="26" cy="13" r="3" fill="#38bdf8"/>
+      <!-- D-Pad left -->
+      <path d="M14 20 L14 25 M11.5 22.5 L16.5 22.5"/>
+      <!-- Buttons right -->
+      <circle cx="26" cy="20" r="0.7" fill="#38bdf8"/>
+      <circle cx="28.5" cy="22.5" r="0.7" fill="#38bdf8"/>
+      <circle cx="23.5" cy="22.5" r="0.7" fill="#38bdf8"/>
+      <circle cx="26" cy="25" r="0.7" fill="#38bdf8"/>
+    </g>
+    <!-- Text -->
+    <text x="80" y="36" class="title">1. Wii U Pro Controller (Hardware)</text>
+    <text x="80" y="55" class="desc">Buttons, symmetrical analog sticks & rumble motors</text>
+    <rect x="360" y="28" width="76" height="22" rx="11" fill="#0284c7" fill-opacity="0.25"/>
+    <text x="398" y="43" text-anchor="middle" class="badge" fill="#7dd3fc">OEM & Clones</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <g transform="translate(285, 110)">
+    <line x1="0" y1="0" x2="0" y2="35" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowDown)"/>
+    <rect x="-85" y="8" width="170" height="18" rx="9" fill="#082f49" stroke="#0284c7" stroke-width="1"/>
+    <text x="0" y="21" text-anchor="middle" class="arrow-badge" fill="#38bdf8">Bluetooth LIAC (2.4 GHz)</text>
+  </g>
+
+  <!-- ================= STAGE 2: Bluetooth Subsystem ================= -->
+  <g transform="translate(60, 150)">
+    <rect width="450" height="80" fill="url(#cardBg)" stroke="#6366f1" stroke-opacity="0.8" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="14" width="52" height="52" rx="10" fill="#4338ca" fill-opacity="0.2" stroke="#4f46e5" stroke-width="1.5"/>
+    <!-- Bluetooth Vector Icon -->
+    <g transform="translate(30, 22)" stroke="#818cf8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 4 L10 32 L20 22 L4 11 L20 11 L10 4 L4 25 L20 14"/>
+    </g>
+    <!-- Text -->
+    <text x="80" y="36" class="title">2. PC Bluetooth Host Adapter</text>
+    <text x="80" y="55" class="desc">Standard internal Bluetooth (Intel, Realtek, Broadcom)</text>
+    <rect x="350" y="28" width="86" height="22" rx="11" fill="#4338ca" fill-opacity="0.3"/>
+    <text x="393" y="43" text-anchor="middle" class="badge" fill="#c7d2fe">Zero Dongles</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <g transform="translate(285, 230)">
+    <line x1="0" y1="0" x2="0" y2="35" stroke="#6366f1" stroke-width="2" marker-end="url(#arrowDown)"/>
+    <rect x="-90" y="8" width="180" height="18" rx="9" fill="#1e1b4b" stroke="#4f46e5" stroke-width="1"/>
+    <text x="0" y="21" text-anchor="middle" class="arrow-badge" fill="#a5b4fc">Dual L2CAP (HID 0x11 / 0x13)</text>
+  </g>
+
+  <!-- ================= STAGE 3: CaféPad Driver Engine ================= -->
+  <g transform="translate(60, 270)">
+    <rect width="450" height="88" fill="url(#cardBg)" stroke="#10b981" stroke-opacity="0.9" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="18" width="52" height="52" rx="10" fill="#065f46" fill-opacity="0.25" stroke="#059669" stroke-width="1.5"/>
+    <!-- Microchip Vector Icon -->
+    <g transform="translate(22, 26)" stroke="#34d399" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="8" y="8" width="20" height="20" rx="3" fill="#064e3b"/>
+      <path d="M13 15 L23 15 M13 18 L23 18 M13 21 L19 21"/>
+      <path d="M12 5 L12 8 M18 5 L18 8 M24 5 L24 8"/>
+      <path d="M12 28 L12 31 M18 28 L18 31 M24 28 L24 31"/>
+      <path d="M5 12 L8 12 M5 18 L8 18 M5 24 L8 24"/>
+      <path d="M28 12 L31 12 M28 18 L31 18 M28 24 L31 24"/>
+    </g>
+    <!-- Text -->
+    <text x="80" y="38" class="title">3. CaféPad C99 Daemon Engine</text>
+    <text x="80" y="58" class="desc">Decodes report 0x3D, normalizes axes & keeps alive</text>
+    <rect x="80" y="65" width="84" height="18" rx="9" fill="#064e3b" fill-opacity="0.5"/>
+    <text x="122" y="78" text-anchor="middle" class="badge" fill="#6ee7b7">Pure C Core</text>
+    <rect x="172" y="65" width="100" height="18" rx="9" fill="#064e3b" fill-opacity="0.5"/>
+    <text x="222" y="78" text-anchor="middle" class="badge" fill="#6ee7b7">Watchdog Active</text>
+  </g>
+
+  <!-- Sidecar Connection (Engine <---> Desktop GUI) -->
+  <g transform="translate(510, 314)">
+    <line x1="10" y1="0" x2="60" y2="0" stroke="#a855f7" stroke-width="2" stroke-dasharray="3,3"/>
+    <polygon points="66,0 56,-4 56,4" fill="#a855f7"/>
+    <polygon points="4,0 14,-4 14,4" fill="#a855f7"/>
+    <rect x="15" y="-18" width="40" height="15" rx="7" fill="#3b0764" stroke="#7e22ce" stroke-width="1"/>
+    <text x="35" y="-7" text-anchor="middle" class="badge" fill="#e9d5ff">IPC</text>
+  </g>
+
+  <!-- ================= SIDECAR: Desktop GUI ================= -->
+  <g transform="translate(580, 270)">
+    <rect width="250" height="88" fill="url(#cardBg)" stroke="#a855f7" stroke-opacity="0.8" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="18" width="52" height="52" rx="10" fill="#581c87" fill-opacity="0.25" stroke="#7e22ce" stroke-width="1.5"/>
+    <!-- Desktop Window Vector Icon -->
+    <g transform="translate(22, 26)" stroke="#c084fc" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="6" width="28" height="24" rx="3" fill="#2e1065"/>
+      <line x1="4" y1="13" x2="32" y2="13"/>
+      <circle cx="8" cy="9.5" r="1" fill="#f43f5e" stroke="none"/>
+      <circle cx="12" cy="9.5" r="1" fill="#facc15" stroke="none"/>
+      <circle cx="16" cy="9.5" r="1" fill="#22c55e" stroke="none"/>
+      <!-- Analog crosshair -->
+      <circle cx="14" cy="21" r="4" stroke="#a855f7"/>
+      <line x1="14" y1="18" x2="14" y2="24"/>
+      <line x1="11" y1="21" x2="17" y2="21"/>
+      <!-- Battery gauge -->
+      <rect x="22" y="19" width="7" height="4" rx="0.5"/>
+    </g>
+    <!-- Text -->
+    <text x="76" y="38" class="title">CaféPad GUI</text>
+    <text x="76" y="58" class="desc">Battery, sticks visualizer</text>
+    <rect x="76" y="65" width="86" height="18" rx="9" fill="#581c87" fill-opacity="0.5"/>
+    <text x="119" y="78" text-anchor="middle" class="badge" fill="#e9d5ff">Desktop App</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <g transform="translate(285, 358)">
+    <line x1="0" y1="0" x2="0" y2="35" stroke="#10b981" stroke-width="2" marker-end="url(#arrowDown)"/>
+    <rect x="-85" y="8" width="170" height="18" rx="9" fill="#064e3b" stroke="#059669" stroke-width="1"/>
+    <text x="0" y="21" text-anchor="middle" class="arrow-badge" fill="#6ee7b7">Kernel /dev/uinput Node</text>
+  </g>
+
+  <!-- ================= STAGE 4: Virtual Xbox Controller ================= -->
+  <g transform="translate(60, 398)">
+    <rect width="450" height="80" fill="url(#cardBg)" stroke="#f59e0b" stroke-opacity="0.85" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="14" width="52" height="52" rx="10" fill="#78350f" fill-opacity="0.25" stroke="#b45309" stroke-width="1.5"/>
+    <!-- Virtual Pad Target Vector Icon -->
+    <g transform="translate(22, 22)" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="18" r="14" fill="#451a03"/>
+      <path d="M11 11 L25 25 M25 11 L11 25" stroke="#f59e0b" stroke-width="2.5"/>
+      <circle cx="18" cy="18" r="5" fill="#0f172a" stroke="#fbbf24"/>
+    </g>
+    <!-- Text -->
+    <text x="80" y="36" class="title">4. Virtual Xbox 360 Gamepad</text>
+    <text x="80" y="55" class="desc">Standard /dev/input/event* &amp; js* devices with rumble</text>
+    <rect x="345" y="28" width="90" height="22" rx="11" fill="#78350f" fill-opacity="0.4"/>
+    <text x="390" y="43" text-anchor="middle" class="badge" fill="#fde68a">Native Evdev</text>
+  </g>
+
+  <!-- Arrow 4 -> 5 (Bidirectional with Rumble) -->
+  <g transform="translate(285, 478)">
+    <!-- Forward Input Arrow (Down) -->
+    <line x1="-20" y1="0" x2="-20" y2="35" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowDown)"/>
+    <!-- Reverse Rumble Arrow (Up) -->
+    <line x1="20" y1="35" x2="20" y2="5" stroke="#ec4899" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowUp)"/>
+    <rect x="-95" y="8" width="190" height="18" rx="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="0" y="21" text-anchor="middle" class="arrow-badge" fill="#f1f5f9">Input Events &amp; Force Feedback</text>
+  </g>
+
+  <!-- ================= STAGE 5: Games & Steam ================= -->
+  <g transform="translate(60, 518)">
+    <rect width="450" height="80" fill="url(#cardBg)" stroke="#38bdf8" stroke-opacity="0.9" class="card"/>
+    <!-- Icon Container -->
+    <rect x="14" y="14" width="52" height="52" rx="10" fill="#0369a1" fill-opacity="0.25" stroke="#0284c7" stroke-width="1.5"/>
+    <!-- Steam / Gaming Arcade Vector Icon -->
+    <g transform="translate(22, 22)" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="6" width="26" height="20" rx="3" fill="#0c4a6e"/>
+      <polygon points="14,12 22,16 14,20" fill="#38bdf8" stroke="none"/>
+      <path d="M11 26 L8 32 L28 32 L25 26"/>
+    </g>
+    <!-- Text -->
+    <text x="80" y="36" class="title">5. Steam, Emulators &amp; Games</text>
+    <text x="80" y="55" class="desc">Cemu, Dolphin, RPCS3, Proton &amp; native Linux games</text>
+    <rect x="330" y="28" width="105" height="22" rx="11" fill="#0369a1" fill-opacity="0.3"/>
+    <text x="382" y="43" text-anchor="middle" class="badge" fill="#7dd3fc">Plug &amp; Play Ready</text>
+  </g>
+</svg>
