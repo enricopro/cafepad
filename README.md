@@ -15,9 +15,9 @@
 
 ## Why CaféPad?
 
-The Nintendo Wii U Pro Controller is known for its ergonomics, symmetrical analog sticks, responsive D-Pad, and 80-hour battery life.
+With an 80-hour battery life, classic Nintendo D-Pad, and solid build quality, the Wii U Pro Controller is a great gamepad to repurpose for PC gaming and emulation.
 
-However, using it on modern Linux distributions presents several challenges:
+However, getting it to connect and stay working on modern Linux distributions has historically been a headache:
 1. **Hidden from standard Bluetooth scans:** Standard Bluetooth utilities search via GIAC (`0x9E8B33`). The Wii U Pro Controller broadcasts exclusively on **LIAC** (*Limited Inquiry Access Code*, `0x9E8B00`).
 2. **Third-party replica issues:** Many replica and clone controllers lack Nintendo vendor IDs or SDP records, causing kernel `hid-wiimote` and BlueZ plugins to reject them.
 3. **The 90-Second Sleep Timeout:** Controllers enter sleep mode after 60–90 seconds of inactivity due to an internal firmware power-saving watchdog.
