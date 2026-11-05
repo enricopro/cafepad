@@ -1,0 +1,99 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0" version="24.0.0">
+  <diagram id="cafepad-architecture" name="CaféPad Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="720" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- GROUP 1: Hardware Layer -->
+        <mxCell id="grp_hw" value="Hardware Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#6c757d;fontStyle=1;fontSize=12;startSize=26;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="820" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="node_pad" value="&lt;b&gt;Wii U Pro Controller (OEM &amp;amp; Third-Party Clones)&lt;/b&gt;&lt;br&gt;• Broadcasts on Limited Inquiry Access Code (LIAC 0x9E8B00) in SYNC mode&lt;br&gt;• 12-bit ADC symmetrical analog sticks, digital face buttons &amp;amp; rumble motors&lt;br&gt;• Onboard microcode power-saving sleep timer (60-90s inactivity watchdog)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=12;" vertex="1" parent="grp_hw">
+          <mxGeometry x="20" y="32" width="780" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- GROUP 2: Linux Host Layer -->
+        <mxCell id="grp_host" value="Linux Host System (Userspace &amp;amp; Kernel)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#6c757d;fontStyle=1;fontSize=12;startSize=26;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="820" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- Node: BlueZ -->
+        <mxCell id="node_bluez" value="&lt;b&gt;Linux Bluetooth Subsystem (BlueZ)&lt;/b&gt;&lt;br&gt;• Native Host Controller Interface (HCI)&lt;br&gt;• Direct L2CAP Control Channel (PSM 0x11)&lt;br&gt;• Direct L2CAP Interrupt Channel (PSM 0x13)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="grp_host">
+          <mxGeometry x="20" y="36" width="370" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Node: GUI -->
+        <mxCell id="node_gui" value="&lt;b&gt;CaféPad Desktop GUI (Python / Tkinter)&lt;/b&gt;&lt;br&gt;• Real-time 60 FPS analog stick crosshairs &amp;amp; button tests&lt;br&gt;• Live battery telemetry, low-battery notifications &amp;amp; pairing&lt;br&gt;• Layout switcher (Xbox 360 / Nintendo) &amp;amp; systemd toggle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="grp_host">
+          <mxGeometry x="430" y="36" width="370" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Node: Daemon -->
+        <mxCell id="node_daemon" value="&lt;b&gt;CaféPad Core Engine (C99 Daemon / libcafepad)&lt;/b&gt;&lt;br&gt;• &lt;b&gt;Discovery:&lt;/b&gt; Scans BlueZ LIAC beacon &amp;amp; connects directly via raw L2CAP sockets (zero dongles needed)&lt;br&gt;• &lt;b&gt;Input Normalization:&lt;/b&gt; Parses Report 0x3D, center-calibrates 12-bit sticks &amp;amp; maps button bitmasks&lt;br&gt;• &lt;b&gt;Watchdog Heartbeat:&lt;/b&gt; Sends periodic 0x15 status inquiry to prevent the 90-second hardware freeze&lt;br&gt;• &lt;b&gt;Force Feedback Worker:&lt;/b&gt; Translates kernel rumble ioctls into Report 0x11 motor activation packets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=12;" vertex="1" parent="grp_host">
+          <mxGeometry x="20" y="130" width="780" height="74" as="geometry" />
+        </mxCell>
+
+        <!-- Node: uinput -->
+        <mxCell id="node_uinput" value="&lt;b&gt;Linux Kernel Virtual Input Subsystem (/dev/uinput)&lt;/b&gt;&lt;br&gt;• Emulates a standard Xbox 360 gamepad exposing /dev/input/event* and /dev/input/js* nodes&lt;br&gt;• Bidirectional event queue: pushes normalized inputs to OS; receives EV_FF / FF_RUMBLE ioctls from games" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=12;" vertex="1" parent="grp_host">
+          <mxGeometry x="20" y="240" width="780" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- GROUP 3: Application Layer -->
+        <mxCell id="grp_app" value="User Applications &amp;amp; Games Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#6c757d;fontStyle=1;fontSize=12;startSize=26;" vertex="1" parent="1">
+          <mxGeometry x="40" y="550" width="820" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Node: Steam -->
+        <mxCell id="node_steam" value="&lt;b&gt;Steam / Proton / Wine Games&lt;/b&gt;&lt;br&gt;• Native Xbox 360 controller detection&lt;br&gt;• In-game tactile vibration (EV_FF rumble)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="grp_app">
+          <mxGeometry x="20" y="32" width="370" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- Node: Emulators -->
+        <mxCell id="node_emu" value="&lt;b&gt;Emulators &amp;amp; Native Linux Titles&lt;/b&gt;&lt;br&gt;• Cemu, Dolphin, RPCS3, RetroArch, PCSX2&lt;br&gt;• Standard Evdev / SDL2 gamepad mapping" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="grp_app">
+          <mxGeometry x="430" y="32" width="370" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- EDGES -->
+        <!-- Hardware to BlueZ -->
+        <mxCell id="edge_hw_bt" value="Over-the-Air Bluetooth 2.1+EDR (L2CAP Packets)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;" edge="1" parent="1" source="node_pad" target="node_bluez">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- BlueZ to Daemon -->
+        <mxCell id="edge_bt_daemon" value="Raw L2CAP Sockets" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;" edge="1" parent="1" source="node_bluez" target="node_daemon">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Daemon to GUI -->
+        <mxCell id="edge_daemon_gui" value="State Telemetry &amp;amp; IPC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="node_daemon" target="node_gui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Daemon to uinput -->
+        <mxCell id="edge_daemon_uinput" value="Virtual Controller Registration" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;" edge="1" parent="1" source="node_daemon" target="node_uinput">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- uinput to Steam -->
+        <mxCell id="edge_uinput_steam" value="Standard /dev/input Events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;" edge="1" parent="1" source="node_uinput" target="node_steam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- uinput to Emulators -->
+        <mxCell id="edge_uinput_emu" value="SDL2 / Linux Evdev" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#495057;strokeColor=#495057;strokeWidth=1.5;" edge="1" parent="1" source="node_uinput" target="node_emu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Reverse Rumble from Steam/Games to Daemon -->
+        <mxCell id="edge_rumble" value="EV_FF / FF_RUMBLE Haptic Motor Requests (Bidirectional)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=#b02a37;strokeColor=#dc3545;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="node_steam" target="node_daemon">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="15" y="600" />
+              <mxPoint x="15" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
