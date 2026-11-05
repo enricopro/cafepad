@@ -34,7 +34,7 @@ CaféPad addresses these issues out of the box with a dedicated C userspace daem
 * **4-Player Local Multiplayer:** Independent worker threads for Players 1 to 4 with respective hardware LED bitmasks (`0x10`, `0x20`, `0x40`, `0x80`).
 * **In-Game Force Feedback (Rumble):** Translates Linux kernel `/dev/uinput` `EV_FF` / `FF_RUMBLE` ioctls from games (Steam, Cemu, retro emulators) into physical motor vibration.
 * **Desktop GUI (`cafepad-gui`):** Dark-mode interface for real-time stick calibration, button diagnostics, battery monitoring, one-click pairing, and vibration testing.
-* **Low-Battery Alerts:** Desktop notifications (`notify-send`) when battery drops to $\le 1$ bar.
+* **Low-Battery Alerts:** Desktop notifications (`notify-send`) when battery drops to 1 bar (25% or below).
 * **Virtual Xbox 360 Emulation:** Exposes controllers system-wide as standard `/dev/input/js*` and `/dev/input/event*` devices with zero deadzones.
 * **Active Watchdog Heartbeat:** Periodic status keepalive requests (`0x15`) prevent the 90-second firmware sleep timeout.
 * **Portable C99 Core:** Self-contained POSIX C99 library (`include/cafepad.h` and `src/cafepad.c`) compatible with Android NDK, RetroArch cores, and embedded platforms.
