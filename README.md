@@ -2,7 +2,7 @@
   <img src="assets/icon-256.png" width="140" height="140" alt="CaféPad Logo" />
 </p>
 
-<h1 align="center">CaféPad</h1>
+<h1 align="center">☕ CaféPad</h1>
 <p align="center"><b>Universal Linux Driver, C99 Library &amp; GUI Suite for Nintendo Wii U Pro Controllers</b><br/>
 <i>Named in homage to Nintendo's internal Wii U hardware codename: <b>Project Café</b></i></p>
 
