@@ -58,57 +58,23 @@ CaféPad acts as a dedicated userspace bridge between the proprietary Nintendo W
 
 ```mermaid
 flowchart TD
-    classDef hw fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff;
-    classDef kernel fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff;
-    classDef engine fill:#744210,stroke:#d69e2e,stroke-width:2px,color:#fff;
-    classDef app fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff;
+    classDef mainNode fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#ffffff;
+    classDef sideNode fill:#161b22,stroke:#a371f7,stroke-width:2px,color:#ffffff;
+    classDef gameNode fill:#161b22,stroke:#3fb950,stroke-width:2px,color:#ffffff;
 
-    subgraph Hardware ["1. Physical Hardware Layer"]
-        PAD["Wii U Pro Controller (OEM or Clone)"]:::hw
-    end
+    PAD["🎮 1. Physical Wii U Pro Controller<br/>Reads your buttons, sticks, and rumble triggers"]:::mainNode
+    BT["📶 2. PC Bluetooth Adapter<br/>Direct L2CAP wireless link (zero dongles needed)"]:::mainNode
+    CORE["⚙️ 3. CaféPad C99 Engine<br/>Decodes hardware signals & keeps gamepad awake"]:::mainNode
+    VIRT["🎯 4. Virtual Xbox 360 Gamepad<br/>Created inside the Linux kernel (/dev/uinput)"]:::mainNode
+    GAMES["👾 5. Steam & Games<br/>Native plug-and-play support with real in-game rumble"]:::gameNode
+    GUI["🖥️ CaféPad Desktop App<br/>Battery monitor, live calibration & visual sync"]:::sideNode
 
-    subgraph KernelBT ["2. Linux Bluetooth Subsystem"]
-        HCI["HCI Bluetooth Adapter (Intel, Realtek, Qualcomm)"]:::kernel
-        L2CAP["Raw L2CAP Channels<br/>Control: PSM 0x11, Interrupt: PSM 0x13"]:::kernel
-    end
-
-    subgraph DaemonEngine ["3. CaféPad C99 Daemon Core"]
-        SCANNER["Discovery Engine<br/>LIAC Inquiry, Class 0x002504, VID 0471"]:::engine
-        WORKER["Player Worker Thread 1 to 4<br/>Report 0x3D Parser, Analog Normalization, Watchdog 0x15"]:::engine
-        RUMBLE["Force Feedback Worker<br/>EV_FF and FF_RUMBLE Listener, 0x11 Motor Dispatcher"]:::engine
-    end
-
-    subgraph KernelUinput ["4. Kernel Virtual Input Layer"]
-        UIN["/dev/uinput (Virtual Xbox 360 Gamepad)"]:::kernel
-        DEV["/dev/input/eventX and /dev/input/jsX"]:::kernel
-    end
-
-    subgraph UserspaceApps ["5. Applications and Games"]
-        STEAM["Steam / Proton / Wine"]:::app
-        EMU["Emulators: Cemu, Dolphin, RPCS3"]:::app
-        GUI["CaféPad Desktop GUI (Live Diagnostics)"]:::app
-    end
-
-    %% Flow connections
-    PAD <--> HCI
-    HCI <--> L2CAP
-    SCANNER -.->|Discovers and Connects| HCI
-    L2CAP -->|Raw 0x3D Reports: Buttons and Sticks| WORKER
-    WORKER -->|Standard Linux Input Events| UIN
-    UIN --> DEV
-    DEV --> STEAM
-    DEV --> EMU
-
-    %% Rumble reverse flow
-    STEAM -->|FF_RUMBLE Effects| UIN
-    EMU -->|FF_RUMBLE Effects| UIN
-    UIN -->|EV_FF ioctls| RUMBLE
-    RUMBLE -->|0x11 Motor Packets| L2CAP
-    L2CAP -->|Haptic Vibration| PAD
-
-    %% Telemetry & Keepalive
-    WORKER -.->|Periodic 0x15 Heartbeat| L2CAP
-    WORKER <--> GUI
+    PAD <-->|Wireless Signal & Vibration| BT
+    BT <-->|Raw Bluetooth Packets| CORE
+    CORE -->|Translates to Standard Input| VIRT
+    VIRT -->|Standard Linux Gamepad Events| GAMES
+    GAMES -.->|In-Game Force Feedback| CORE
+    CORE <-->|Live Telemetry & Sync| GUI
 ```
 
 ---
