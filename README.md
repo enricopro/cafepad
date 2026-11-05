@@ -64,49 +64,51 @@ flowchart TD
     classDef app fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff;
 
     subgraph Hardware ["1. Physical Hardware Layer"]
-        PAD["Wii U Pro Controller<br/>(OEM or Third-Party Clone)"]:::hw
+        PAD["Wii U Pro Controller (OEM or Clone)"]:::hw
     end
 
     subgraph KernelBT ["2. Linux Bluetooth Subsystem"]
-        HCI["HCI Bluetooth Adapter<br/>(Intel / Realtek / Broadcom / Qualcomm)"]:::kernel
-        L2CAP["Raw L2CAP Channels<br/>PSM 0x11: Control | PSM 0x13: Interrupt"]:::kernel
+        HCI["HCI Bluetooth Adapter (Intel, Realtek, Qualcomm)"]:::kernel
+        L2CAP["Raw L2CAP Channels<br/>Control: PSM 0x11, Interrupt: PSM 0x13"]:::kernel
     end
 
     subgraph DaemonEngine ["3. CaféPad C99 Daemon Core"]
-        SCANNER["Discovery Engine<br/>• LIAC 0x9E8B00 Inquiry<br/>• Device Class 0x002504 / VID 0471"]:::engine
-        WORKER["Player Worker Thread (1 to 4)<br/>• Report 0x3D Input Parser<br/>• 12-bit Analog Normalization<br/>• Watchdog Keepalive (0x15 Timer)"]:::engine
-        RUMBLE["Force Feedback Worker<br/>• EV_FF / FF_RUMBLE Event Listener<br/>• 0x11 Motor Packet Dispatcher"]:::engine
+        SCANNER["Discovery Engine<br/>LIAC Inquiry, Class 0x002504, VID 0471"]:::engine
+        WORKER["Player Worker Thread 1 to 4<br/>Report 0x3D Parser, Analog Normalization, Watchdog 0x15"]:::engine
+        RUMBLE["Force Feedback Worker<br/>EV_FF and FF_RUMBLE Listener, 0x11 Motor Dispatcher"]:::engine
     end
 
     subgraph KernelUinput ["4. Kernel Virtual Input Layer"]
-        UIN["/dev/uinput<br/>(Virtual Xbox 360 Gamepad Node)"]:::kernel
-        DEV["/dev/input/event* & /dev/input/js*"]:::kernel
+        UIN["/dev/uinput (Virtual Xbox 360 Gamepad)"]:::kernel
+        DEV["/dev/input/eventX and /dev/input/jsX"]:::kernel
     end
 
-    subgraph UserspaceApps ["5. Applications & Games"]
+    subgraph UserspaceApps ["5. Applications and Games"]
         STEAM["Steam / Proton / Wine"]:::app
-        EMU["Emulators (Cemu, Dolphin, RPCS3)"]:::app
-        GUI["CaféPad Desktop GUI<br/>(Live Diagnostics, Battery, Mapping)"]:::app
+        EMU["Emulators: Cemu, Dolphin, RPCS3"]:::app
+        GUI["CaféPad Desktop GUI (Live Diagnostics)"]:::app
     end
 
     %% Flow connections
-    PAD <-->|Bluetooth 2.1+EDR (LIAC)| HCI
+    PAD <--> HCI
     HCI <--> L2CAP
-    SCANNER -.->|Discovers & Connects| HCI
-    L2CAP -->|Raw 0x3D Reports (Buttons & Sticks)| WORKER
+    SCANNER -.->|Discovers and Connects| HCI
+    L2CAP -->|Raw 0x3D Reports: Buttons and Sticks| WORKER
     WORKER -->|Standard Linux Input Events| UIN
     UIN --> DEV
-    DEV --> STEAM & EMU
+    DEV --> STEAM
+    DEV --> EMU
 
     %% Rumble reverse flow
-    STEAM & EMU -->|FF_RUMBLE Effects| UIN
+    STEAM -->|FF_RUMBLE Effects| UIN
+    EMU -->|FF_RUMBLE Effects| UIN
     UIN -->|EV_FF ioctls| RUMBLE
-    RUMBLE -->|0x11 Motor Commands| L2CAP
-    L2CAP -->|Vibration Signals| PAD
+    RUMBLE -->|0x11 Motor Packets| L2CAP
+    L2CAP -->|Haptic Vibration| PAD
 
-    %% Watchdog & GUI
+    %% Telemetry & Keepalive
     WORKER -.->|Periodic 0x15 Heartbeat| L2CAP
-    WORKER <-->|Config & State IPC| GUI
+    WORKER <--> GUI
 ```
 
 ---
