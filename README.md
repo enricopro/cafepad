@@ -30,7 +30,7 @@ CaféPad addresses these issues out of the box with a dedicated C userspace daem
 ## Features
 
 * **Zero External Dongles:** Connects directly via your system's built-in Bluetooth controller (Intel, Realtek, Broadcom, Qualcomm, etc.). No USB adapters needed.
-* **Universal Detection:** Discovers and pairs both genuine Nintendo controllers and third-party clones (including VID `0471` / PID `0666` and unbranded replicas) using over-the-air BlueZ discovery without hardcoded MAC addresses.
+* **Universal Detection:** Discovers and pairs both genuine Nintendo controllers and third-party clones (including VID `0471` / PID `0666` and unbranded replicas) using over-the-air BlueZ discovery.
 * **4-Player Local Multiplayer:** Independent worker threads for Players 1 to 4 with respective hardware LED bitmasks (`0x10`, `0x20`, `0x40`, `0x80`).
 * **In-Game Force Feedback (Rumble):** Translates Linux kernel `/dev/uinput` `EV_FF` / `FF_RUMBLE` ioctls from games (Steam, Cemu, retro emulators) into physical motor vibration.
 * **Desktop GUI (`cafepad-gui`):** Dark-mode interface for real-time stick calibration, button diagnostics, battery monitoring, one-click pairing, and vibration testing.
