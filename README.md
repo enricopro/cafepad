@@ -8,12 +8,6 @@
 
 <p align="center">
   <a href="https://kernel.org"><img src="https://img.shields.io/badge/Platform-Linux-orange.svg" alt="Platform" /></a>
-  <a href="https://bluez.org"><img src="https://img.shields.io/badge/Bluetooth-Zero--Dongle%20Native-blue.svg" alt="Bluetooth" /></a>
-  <img src="https://img.shields.io/badge/Force%20Feedback-EV__FF%20%2F%20FF__RUMBLE-red.svg" alt="Force Feedback" />
-  <img src="https://img.shields.io/badge/Multiplayer-Players%201--4%20LEDs-brightgreen.svg" alt="Multiplayer" />
-  <img src="https://img.shields.io/badge/C-C99-brightgreen.svg" alt="C Standard" />
-  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.7%2B-yellow.svg" alt="Python" /></a>
-  <img src="https://img.shields.io/badge/GUI-Caf%C3%A9Pad%20Desktop-purple.svg" alt="GUI" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="License" /></a>
 </p>
 
