@@ -3,8 +3,8 @@
 </p>
 
 <h1 align="center">☕ CaféPad</h1>
-<p align="center"><b>Universal Linux Driver, C99 Library &amp; GUI Suite for Nintendo Wii U Pro Controllers</b><br/>
-<i>Named in homage to Nintendo's internal Wii U hardware codename: <b>Project Café</b></i></p>
+<p align="center"><b>Universal Linux Driver, C99 Library, and GUI Suite for Nintendo Wii U Pro Controllers</b><br/>
+<i>Named in homage to the Nintendo hardware code name: <b>Project Café</b></i></p>
 
 <p align="center">
   <a href="https://kernel.org"><img src="https://img.shields.io/badge/Platform-Linux-orange.svg" alt="Platform" /></a>
@@ -13,98 +13,115 @@
 
 ---
 
-## Why CaféPad?
+## Purpose
 
-With an 80-hour battery life, classic Nintendo D-Pad, and solid build quality, the Wii U Pro Controller is a great gamepad to repurpose for PC gaming and emulation.
+The Nintendo Wii U Pro Controller has an 80-hour battery life and high build quality.
+Many players want to use this controller for computer games and emulators on Linux.
 
-However, getting it to connect and stay working on modern Linux distributions has historically been a headache:
-1. **Hidden from standard Bluetooth scans:** Standard Bluetooth utilities search via GIAC (`0x9E8B33`). The Wii U Pro Controller broadcasts exclusively on **LIAC** (*Limited Inquiry Access Code*, `0x9E8B00`).
-2. **Third-party replica issues:** Many replica and clone controllers lack Nintendo vendor IDs or SDP records, causing kernel `hid-wiimote` and BlueZ plugins to reject them.
-3. **The 90-Second Sleep Timeout:** Controllers enter sleep mode after 60–90 seconds of inactivity due to an internal firmware power-saving watchdog.
-4. **Missing Force Feedback & Multi-Controller LEDs:** Standard tools often lack in-game rumble (`EV_FF`) or player LED assignment.
+Standard Linux distributions have connection problems with this controller:
+1. **Hidden from standard Bluetooth scans:** Standard Bluetooth software searches with the General Inquiry Access Code (GIAC, `0x9E8B33`). The Wii U Pro Controller transmits only with the Limited Inquiry Access Code (LIAC, `0x9E8B00`).
+2. **Third-party replica problems:** Many replica controllers do not have standard Nintendo vendor IDs or SDP records. Because of this, the Linux kernel and BlueZ reject them.
+3. **The 90-second sleep timeout:** An internal watchdog timer turns off the controller after 60 to 90 seconds without communication.
+4. **Missing force feedback and player LEDs:** Standard drivers do not support rumble effects (`EV_FF`) or player LED assignments.
 
-CaféPad addresses these issues out of the box with a dedicated C userspace daemon and companion GUI.
+CaféPad solves these problems with a dedicated C userspace daemon and a graphical user interface (GUI).
 
 ---
 
 ## Features
 
-* **Zero External Dongles:** Connects directly via your system's built-in Bluetooth controller (Intel, Realtek, Broadcom, Qualcomm, etc.). No USB adapters needed.
-* **Universal Detection:** Discovers and pairs both genuine Nintendo controllers and third-party clones (including VID `0471` / PID `0666` and unbranded replicas) using over-the-air BlueZ discovery.
-* **4-Player Local Multiplayer:** Independent worker threads for Players 1 to 4 with respective hardware LED bitmasks (`0x10`, `0x20`, `0x40`, `0x80`).
-* **In-Game Force Feedback (Rumble):** Translates Linux kernel `/dev/uinput` `EV_FF` / `FF_RUMBLE` ioctls from games (Steam, Cemu, retro emulators) into physical motor vibration.
-* **Desktop GUI (`cafepad-gui`):** Dark-mode interface for real-time stick calibration, button diagnostics, battery monitoring, one-click pairing, and vibration testing.
-* **Low-Battery Alerts:** Desktop notifications (`notify-send`) when battery drops to 1 bar (25% or below).
-* **Virtual Xbox 360 Emulation:** Exposes controllers system-wide as standard `/dev/input/js*` and `/dev/input/event*` devices with zero deadzones.
-* **Active Watchdog Heartbeat:** Periodic status keepalive requests (`0x15`) prevent the 90-second firmware sleep timeout.
-* **Portable C99 Core:** Self-contained POSIX C99 library (`include/cafepad.h` and `src/cafepad.c`) compatible with Android NDK, RetroArch cores, and embedded platforms.
+* **No external adapters:** The software connects directly through the internal Bluetooth adapter of your computer. You do not need USB adapters.
+* **Universal detection:** The software finds and connects genuine Nintendo controllers and third-party replica controllers.
+* **Four-player local multiplayer:** The software provides four separate worker threads. Each player slot controls its hardware LED bitmask (`0x10`, `0x20`, `0x40`, `0x80`).
+* **Force feedback (rumble):** The software converts kernel `/dev/uinput` force-feedback commands (`EV_FF` / `FF_RUMBLE`) from games into controller motor vibration.
+* **Desktop GUI (`cafepad-gui`):** A graphical interface lets you calibrate analog sticks, test buttons, monitor battery levels, pair controllers, and test vibration.
+* **Low battery alerts:** The system sends desktop notifications (`notify-send`) when the battery level drops to 25 percent or lower.
+* **Virtual Xbox 360 controller:** The software creates standard `/dev/input/js*` and `/dev/input/event*` devices with zero deadzones.
+* **Active watchdog signal:** The daemon sends periodic status requests (`0x15`) to prevent the 90-second sleep timeout.
+* **Portable C99 core:** A self-contained POSIX C99 library (`include/cafepad.h` and `src/cafepad.c`) operates on Linux, Android NDK, and embedded platforms.
 
 ---
 
 ## How It Works
 
 ### High-Level Summary
-CaféPad acts as a userspace bridge between the proprietary Nintendo Wii U Pro Bluetooth protocol and the standard Linux input subsystem:
+CaféPad is a userspace bridge between the Nintendo Bluetooth protocol and the standard Linux input subsystem:
 
-1. **Discovery & Connection:** Scans the Limited Inquiry Access Code (**LIAC**) used by Wii U controllers in SYNC mode and establishes raw dual-channel **L2CAP sockets** directly to the hardware.
-2. **Signal Decoding & Translation:** Ingests raw hardware reports, decodes 12-bit analog stick values, maps button states into standard Linux input codes, and injects them into the Linux kernel via `/dev/uinput` as a virtual Xbox 360 controller (`/dev/input/js*` and `/dev/input/event*`).
-3. **Bidirectional Force Feedback (Rumble):** Intercepts `EV_FF` / `FF_RUMBLE` effects emitted by games through `/dev/uinput` and translates them into physical motor commands sent back to the controller over Bluetooth.
-4. **Hardware Keepalive:** Transmits periodic status requests to prevent the controller's internal power-saving microcode from sleeping after 90 seconds.
-5. **Desktop Management:** An asynchronous desktop GUI interacts with the daemon's configuration and telemetry to display real-time calibration, battery levels, and player assignments.
+1. **Discovery and connection:** The daemon scans for the Limited Inquiry Access Code (**LIAC**). When you start SYNC mode, the daemon opens two raw **L2CAP sockets** to the controller.
+2. **Signal decoding and translation:** The software decodes 12-bit analog stick values and button bitmasks. Then, it sends standard Linux input events to `/dev/uinput` as a virtual Xbox 360 controller.
+3. **Bidirectional force feedback (rumble):** The software receives `EV_FF` / `FF_RUMBLE` events from the kernel. Then, it transmits motor commands to the controller over Bluetooth.
+4. **Hardware keepalive:** The software sends periodic status requests to keep the controller active.
+5. **Desktop management:** A desktop GUI communicates with the daemon to show real-time stick calibration, battery levels, and player assignments.
 
 ---
 
-### System Architecture & Data Flow
+### System Architecture and Data Flow
 
 <p align="center">
-  <img src="assets/architecture.png" width="100%" alt="CaféPad System Architecture & Data Flow" />
+  <img src="assets/architecture.png" width="100%" alt="CaféPad System Architecture and Data Flow" />
 </p>
 
 ---
 
-### Detailed Subsystem Breakdown
+### Detailed Subsystems
 
-#### 1. Discovery & Connection Negotiation
-Standard Linux Bluetooth managers (BlueZ desktop applets, GNOME Control Center, KDE Bluedevil) search only for devices answering **GIAC** (*General Inquiry Access Code*, `0x9E8B33`). The Wii U Pro Controller deliberately broadcasts only on **LIAC** (*Limited Inquiry Access Code*, `0x9E8B00`) for a brief window when the SYNC button is pressed.
-* CaféPad drives low-level BlueZ inquiry routines directly with the LIAC LAP filter to detect incoming pairing beacons instantly.
-* Many third-party replica controllers lack proper Nintendo Vendor/Product IDs (VID `0x057e` / PID `0x0330`), exposing instead generic or unbranded chipsets (such as VID `0x0471` / PID `0x0666`). CaféPad inspects Bluetooth Class of Device (`0x002504` – Gamepad) and SDP service records to reliably pair both genuine Nintendo controllers and clones without manual configuration.
-* Once detected, CaféPad opens two dedicated L2CAP connections: **PSM `0x11`** (HID Control) for sending commands/rumble, and **PSM `0x13`** (HID Interrupt) for high-frequency input streams.
+#### 1. Discovery and Connection Negotiation
+Standard Linux Bluetooth managers search only for devices that use the General Inquiry Access Code (**GIAC**, `0x9E8B33`).
+The Wii U Pro Controller transmits only with the Limited Inquiry Access Code (**LIAC**, `0x9E8B00`) when you push the SYNC button.
 
-#### 2. Input Report Decoding & Normalization
-The controller transmits state packets using **Report `0x3D`** (an 11-byte continuous data stream):
-* **Analog Sticks:** Stick positions are encoded as 12-bit values (range 0–4095). CaféPad normalizes these readings using pre-calibrated center baselines (`2048`) and dynamic travel limits, converting them into smooth, zero-latency floating-point values and standard Linux axis values (`ABS_X`, `ABS_Y`, `ABS_RX`, `ABS_RY`).
-* **Button Layout Mapping:** Buttons are decoded from raw bitmasks. Users can select between:
-  * **Xbox 360 Style (Default):** Maps buttons by *physical spatial position* (bottom button is `BTN_SOUTH` / A, right button is `BTN_EAST` / B). This matches modern PC game prompts and Steam Deck muscle memory.
-  * **Nintendo Native Style:** Maps buttons by *printed label* (physical A maps to `BTN_EAST`, physical B maps to `BTN_SOUTH`).
+* CaféPad uses low-level BlueZ inquiry routines with the LIAC filter to detect controllers immediately.
+* Many replica controllers do not use Nintendo vendor or product IDs (`0x057e` / `0x0330`). Instead, they show generic chipsets (for example, `0x0471` / `0x0666`).
+* CaféPad checks the Bluetooth Class of Device (`0x002504` - Gamepad) and SDP service records. This check lets the software pair genuine controllers and replica controllers automatically.
+* After discovery, CaféPad opens two dedicated L2CAP channels:
+  * **PSM `0x11`** (HID Control) to send commands and rumble signals.
+  * **PSM `0x13`** (HID Interrupt) to receive input reports at high frequency.
+
+#### 2. Input Report Decoding and Normalization
+The controller transmits data with **Report `0x3D`** in an 11-byte continuous stream.
+
+* **Analog sticks:** The controller encodes stick positions as 12-bit values (range 0 to 4095). CaféPad normalizes these values with a calibrated center baseline (`2048`) and dynamic limits. The software converts these readings into standard Linux axis events (`ABS_X`, `ABS_Y`, `ABS_RX`, `ABS_RY`).
+* **Button mapping:** CaféPad decodes button states from raw bitmasks. You can select between two layouts:
+  * **Xbox 360 layout (default):** Maps buttons by physical position. The bottom button sends `BTN_SOUTH` (Xbox A). The right button sends `BTN_EAST` (Xbox B). This layout matches modern PC game prompts.
+  * **Nintendo native layout:** Maps buttons by printed label. The physical button A sends `BTN_EAST`. The physical button B sends `BTN_SOUTH`.
 
 #### 3. Virtual Input Subsystem (`/dev/uinput`)
-Instead of acting merely as a translation script, CaféPad registers a virtual hardware device directly with the Linux kernel using `/dev/uinput`:
-* Games interact with it as a standard native controller via `/dev/input/event*` and `/dev/input/js*`.
-* Because it presents standard Xbox 360 capability bits, Steam Input, Wine, Proton, and native Linux engines immediately recognize it with zero manual mapping or configuration files required.
+CaféPad registers a virtual hardware device with the Linux kernel through `/dev/uinput`.
+
+* Games interact with the virtual gamepad through `/dev/input/event*` and `/dev/input/js*`.
+* The virtual gamepad exposes standard Xbox 360 capabilities.
+* Steam Input, Wine, Proton, and native Linux games recognize the controller without manual configuration.
 
 #### 4. Force Feedback (Rumble) Engine
-To support genuine physical vibration:
-* CaféPad declares `EV_FF` and `FF_RUMBLE` capabilities on the virtual uinput node.
-* When a game fires an explosion or tactile feedback effect, the kernel routes the `FF_RUMBLE` request to CaféPad's force-feedback worker.
-* The daemon computes the composite motor intensity and formats an output **Report `0x11`** with the appropriate motor activation flag, sending it over L2CAP PSM `0x11` to the physical controller with sub-millisecond dispatch time.
+CaféPad provides full rumble support for games:
 
-#### 5. Watchdog Keepalive & Power Management
-The Wii U Pro Controller's onboard firmware features an aggressive internal sleep timer designed for the Wii U console: if no communication is received from the host within 60–90 seconds, the controller disconnects automatically.
-* CaféPad's worker thread runs a dedicated asynchronous timer that periodically transmits a non-intrusive status request (**Report `0x15`**).
-* This ping prevents the controller from falling asleep mid-game, preserves battery health, and allows CaféPad to continuously read back live battery level telemetry.
+* The daemon registers `EV_FF` and `FF_RUMBLE` capabilities on the virtual uinput device.
+* When a game sends a rumble effect, the Linux kernel forwards the `FF_RUMBLE` request to CaféPad.
+* The daemon calculates the motor vibration level.
+* The daemon creates an output **Report `0x11`** with the rumble flag.
+* The daemon sends this report over L2CAP PSM `0x11` to the controller immediately.
 
-#### 6. Desktop GUI & Telemetry Integration
-The companion desktop application (`cafepad-gui`) is built in Python/Tkinter:
-* It reads configuration profiles and telemetry from `~/.config/cafepad.json`.
-* It provides a 60 FPS visual diagnostic canvas displaying real-time stick deflection, button presses, battery meters, and a one-click rumble test.
-* It manages user systemd autostart services without requiring manual terminal administration.
+#### 5. Watchdog Keepalive and Power Management
+The firmware of the Wii U Pro Controller includes an internal sleep timer.
+If the host does not send communication within 60 to 90 seconds, the controller disconnects.
+
+* CaféPad runs an asynchronous timer that sends periodic status requests (**Report `0x15`**).
+* This signal keeps the controller active during gameplay.
+* The status response also gives continuous battery level data to the daemon.
+
+#### 6. Desktop GUI and Telemetry
+The desktop application (`cafepad-gui`) is written in Python and Tkinter:
+
+* It reads configuration files and telemetry data from `~/.config/cafepad.json`.
+* It provides a 60 frames-per-second visual display for stick deflection, button presses, and battery levels.
+* It lets you test controller vibration with one click.
+* It configures systemd autostart services without manual terminal commands.
 
 ---
 
 ## Quick Start
 
-### 1. Install (One-Step Script)
-Clone the repository and run the universal installer:
+### 1. Install the Software
+Clone the repository and run the installation script:
 
 ```bash
 git clone https://github.com/enricopro/cafepad.git
@@ -112,68 +129,71 @@ cd cafepad
 ./install.sh
 ```
 
-### 2. Connect Your Controller
-1. Turn on your controller and **press and hold the red SYNC button** on the back until the 4 blue LEDs at the bottom start flashing rapidly.
-2. Run CaféPad in your terminal:
+### 2. Connect the Controller
+1. Turn on the controller.
+2. Push and hold the red **SYNC** button on the back of the controller until the four LEDs flash rapidly.
+3. Start CaféPad in your terminal:
    ```bash
    cafepad
    ```
-   *(Or launch the graphical interface with `cafepad-gui`)*
-3. The controller vibrates, Player 1 LED locks solid blue, and your gamepad is ready system-wide.
+   *Note: You can also start the graphical interface with `cafepad-gui`.*
+4. The controller vibrates, and the Player 1 LED stays on. The gamepad is now ready for use.
 
 > [!TIP]
-> The controller's MAC address is automatically saved to `~/.config/cafepad.json`. On subsequent uses, simply press any button on your controller to connect in under 1 second.
+> CaféPad saves the Bluetooth MAC address to `~/.config/cafepad.json`. For later connections, push any button on the controller to connect automatically.
 
 ---
 
 ## Desktop GUI (`cafepad-gui`)
 
-CaféPad includes a dedicated desktop application for configuration and hardware verification:
+CaféPad includes a graphical desktop application for configuration and hardware tests:
 
 <p align="center">
   <img src="assets/screenshot_home.png" width="48%" alt="CaféPad Dashboard" />
   <img src="assets/screenshot_diagnostics.png" width="48%" alt="Hardware Diagnostics" />
 </p>
 <p align="center">
-  <img src="assets/screenshot_settings.png" width="48%" alt="Preferences & Mappings" />
+  <img src="assets/screenshot_settings.png" width="48%" alt="Preferences and Mappings" />
   <img src="assets/screenshot_modal.png" width="48%" alt="Modal Confirmation" />
 </p>
 
+Start the desktop interface:
 ```bash
 cafepad-gui
 ```
+*Note: You can also start the interface from your desktop application menu.*
 
-*(You can also launch it directly from application launchers like GNOME Dash or KDE Kickoff)*
-
-### Key GUI Capabilities:
-* **4-Player Hardware Cards:** View connection states, MAC addresses, and battery indicators.
-* **Authentic Symmetrical Diagnostics:** 60 FPS visualizer displaying analog stick deflection in authentic Wii U top positions, triggers, and ABXY diamond.
-* **One-Click Sync Wizard:** Click **"Pair Controller"** and hold the red SYNC button; the GUI automatically pairs and registers the pad to the next available player slot.
-* **Haptic Rumble Testing:** One-click vibration motor test button.
-* **Layout Switcher:** Instantly toggle between **Xbox 360 Mode** (standard PC gaming) and **Nintendo Native Mode** (A=A, B=B).
-* **Systemd Integration:** Enable or disable background login autostart with a single click.
-* **In-Window Modal Confirmations:** Dialogs for disconnecting and forgetting saved controllers.
+### Main GUI Functions
+* **Four-player status cards:** Show connection states, MAC addresses, and battery levels.
+* **Diagnostics screen:** Shows analog stick positions, trigger values, and button presses at 60 frames per second.
+* **Sync assistant:** Click **"Pair Controller"** and push the SYNC button. The GUI pairs the controller and assigns an available player slot.
+* **Rumble test:** Tests the vibration motors with one click.
+* **Layout switch:** Switches between **Xbox 360 Mode** and **Nintendo Native Mode**.
+* **Systemd control:** Enables or disables automatic startup at user login.
+* **Confirmation dialogs:** Confirms controller disconnection or removal.
 
 ---
 
 ## Background Service (systemd)
 
-To have controllers connect automatically on any button press without opening a terminal:
+You can run CaféPad as a user service.
+This service lets controllers connect automatically when you push any button:
 
 ```bash
 systemctl --user enable --now cafepad
 ```
 
-To view live service logs:
+To view live service logs, run:
 ```bash
 journalctl --user -u cafepad -f
 ```
 
 ---
 
-## Controller Layout & Mapping
+## Controller Layout and Mapping
 
-By default, buttons are mapped by **physical position** (Xbox 360 layout) for seamless compatibility with Steam and modern PC games:
+By default, CaféPad maps buttons by **physical position** (Xbox 360 layout).
+This mapping gives standard compatibility with Steam and modern PC games:
 
 | Wii U Pro Label | Physical Position | Linux Evdev Button | Xbox 360 Equivalent |
 |:---:|:---:|:---:|:---:|
@@ -189,52 +209,53 @@ By default, buttons are mapped by **physical position** (Xbox 360 layout) for se
 | **D-Pad** | Directional | `ABS_HAT0X` / `ABS_HAT0Y` | **Hat Switch** |
 
 > [!NOTE]
-> To map buttons by printed letter (A maps to A, B maps to B), use the `--nintendo-layout` flag or switch it in the GUI:
+> To map buttons by printed letter (A to A, B to B), use the `--nintendo-layout` option or change the setting in the GUI:
 > ```bash
 > cafepad --nintendo-layout
 > ```
 
 ---
 
-## CLI Reference
+## Command-Line Interface (CLI) Reference
 
 ```text
 Usage: cafepad [OPTIONS]
 
 Options:
-  -h, --help            Show help message and exit
-  --target, --mac MAC   Connect directly to a specific Bluetooth MAC address
-  --scan, --pair        Force inquiry scan for nearby controllers in SYNC mode
-  --test-rumble         Test physical vibration motors on connected controller
-  --nintendo-layout     Map buttons by printed letters (A->A) instead of Xbox positions
-  --gui                 Launch CaféPad graphical desktop interface
-  --status              Print configured controller slots and exit
-  --daemon              Run silently in background (for systemd service)
-  -v, --version         Print version information
+  -h, --help            Show this help text and exit
+  --target, --mac MAC   Connect directly to a specified Bluetooth MAC address
+  --scan, --pair        Scan for controllers in SYNC mode
+  --test-rumble         Test vibration motors on the connected controller
+  --nintendo-layout     Map buttons by printed letters (A to A)
+  --gui                 Start the graphical desktop interface
+  --status              Show configured controller slots and exit
+  --daemon              Run as a background daemon (for systemd)
+  -v, --version         Show version information and exit
 ```
 
 ---
 
 ## C API (`libcafepad`)
 
-CaféPad includes a POSIX C99 library (`libcafepad.so` and `libcafepad.a`):
+CaféPad includes a POSIX C99 library (`libcafepad.so` and `libcafepad.a`).
 
-### Example Usage
-Save as `example.c`:
+### Example Code
+Save this code as `example.c`:
+
 ```c
 #include <stdio.h>
 #include <unistd.h>
 #include <cafepad.h>
 
 int main(void) {
-    /* Automatically opens saved Bluetooth controller, USB, or /dev/input/js* */
+    /* Opens a saved Bluetooth controller, USB device, or /dev/input/js* */
     cafepad_device_t* dev = cafepad_open();
     if (!dev) {
         printf("Controller not found. Put controller in SYNC mode and retry.\n");
         return 1;
     }
 
-    printf("Connected! Polling inputs...\n");
+    printf("Connected. Polling inputs...\n");
     cafepad_state_t state;
 
     while (1) {
@@ -252,7 +273,9 @@ int main(void) {
 }
 ```
 
-### Compiling with pkg-config:
+### Compile the Example
+Compile the program with `pkg-config`:
+
 ```bash
 gcc example.c $(pkg-config --cflags --libs cafepad) -o example
 ./example
@@ -260,27 +283,29 @@ gcc example.c $(pkg-config --cflags --libs cafepad) -o example
 
 ---
 
-## Portability & Embedded Platforms
+## Portability and Embedded Platforms
 
-CaféPad is designed to be portable beyond traditional desktop Linux:
-* **Self-Contained C99 Implementation:** [`src/cafepad.c`](src/cafepad.c) and [`include/cafepad.h`](include/cafepad.h) have no dependencies on Python or desktop runtimes.
-* **Android NDK Compatibility:** The packet parser and L2CAP sequencing compile cleanly under Android's Bionic libc / NDK, making it embeddable into Android TV, Google TV native apps, or RetroArch input drivers.
-* **USB & Bluetooth Dual Engine:** Supports both wireless Bluetooth L2CAP and wired USB clone protocols (`0471:0666`).
+CaféPad can operate on platforms other than desktop Linux:
+
+* **Self-contained C99 implementation:** The core source files ([`src/cafepad.c`](src/cafepad.c) and [`include/cafepad.h`](include/cafepad.h)) do not depend on Python or desktop libraries.
+* **Android NDK compatibility:** The packet parser and L2CAP routines compile with the Android Bionic C library and NDK. You can embed the library into Android TV applications or RetroArch drivers.
+* **Dual interface support:** The software supports wireless Bluetooth L2CAP connections and wired USB replica controllers (`0471:0666`).
 
 ---
 
 ## Backwards Compatibility
 
-For existing scripts or build workflows configured for `wiiupro`:
-* The executable command `wiiupro` is symlinked to `cafepad`.
-* The header `<wiiupro.h>` automatically includes `<cafepad.h>` and provides aliases for all types and constants.
-* `libwiiupro.so`, `libwiiupro.a`, and `wiiupro.pc` are provided out of the box.
+CaféPad maintains compatibility for scripts and build environments configured for `wiiupro`:
+
+* The `wiiupro` command links directly to `cafepad`.
+* The header `<wiiupro.h>` includes `<cafepad.h>` and provides aliases for all types and constants.
+* The installation provides `libwiiupro.so`, `libwiiupro.a`, and `wiiupro.pc`.
 
 ---
 
 ## Uninstallation
 
-To cleanly remove udev rules, binaries, libraries, and desktop entries:
+To remove udev rules, binary files, libraries, and desktop menu entries, run:
 
 ```bash
 ./uninstall.sh
@@ -290,4 +315,4 @@ To cleanly remove udev rules, binaries, libraries, and desktop entries:
 
 ## License
 
-Distributed under the **GNU General Public License v3.0** (GPL-3.0). See [LICENSE](LICENSE) for the full text.
+This project uses the **GNU General Public License v3.0** (GPL-3.0). Refer to [LICENSE](LICENSE) for the complete license text.
